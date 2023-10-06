@@ -17,10 +17,6 @@ public class Cylinder : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
     }
-    private void Start()
-    {
-        SetGravity(false, 0);
-    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -53,22 +49,15 @@ public class Cylinder : MonoBehaviour
         float jumpForce = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
         _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
-
-    public void SetGravity(bool gravity, float gravityValue)
-    { 
-        _rigidbody.useGravity = gravity;
-        _gravity = gravityValue;
-    }
-    public void SetVisitedPlanet(Transform planet)
+    public void SetVisitedPlanet(Transform planet, float gravityValue)
     { 
         _visitedPlanet = planet;
+        gameObject.transform.SetParent(_visitedPlanet, true);
+
+        _gravity = gravityValue;
     }
     private void Gravity()
     {
-        if (_rigidbody.useGravity && _visitedPlanet != null)
-        {
-            Vector3 directionGravity = _visitedPlanet.position - transform.position;
-            Physics.gravity = directionGravity;
-        }
+        Physics.gravity = -transform.up;
     }
 }

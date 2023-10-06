@@ -19,12 +19,10 @@ public class Planet : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         _cylinder = other.gameObject.GetComponent<Cylinder>();
-        _cylinder.SetGravity(true, _gravity);
-        _cylinder.SetVisitedPlanet(_planetTransform);
+        _cylinder.SetVisitedPlanet(_planetTransform, _gravity);
     }
-    private void OnTriggerExit(Collider other)
-    {
-        _cylinder.SetGravity(false, 0);
-        _cylinder.SetVisitedPlanet(null);
-    }
+    //private void OnTriggerExit(Collider other)
+    //{
+        //_cylinder.SetVisitedPlanet(null, 0);
+    //}
 }
