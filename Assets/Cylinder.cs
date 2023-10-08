@@ -1,37 +1,58 @@
-using UnityEngine;
+using UnityEngine;      
+using static UnityEngine.GraphicsBuffer;
 
 
 public class Cylinder : MonoBehaviour
 {
-    public Vector3 input;
     private Rigidbody _rigidbody;
+    private Transform _visitedPlanet;
 
-    public Transform _visitedPlanet;
+    private Quaternion rotationRef;
+    private Vector3 input;
 
-    Quaternion rotationRef;
+    [SerializeField] private float _speed;
 
-    [SerializeField]private float _speed;
-    [SerializeField]private float _gravity;
+    private float _gravity;
     private float _jumpHeight = 2f;
+
+    private bool _inPlanet;
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-            Jump();
+        if (_inPlanet)
+            InputCharacter();
     }
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         Angel();
-        Gravity();
+        Move();   
+    }
+    private void InputCharacter()
+    {
         float _xInputDirection = Input.GetAxis("Horizontal");
         float _zInputDirection = Input.GetAxis("Vertical");
 
         input = new Vector3(_xInputDirection, 0, _zInputDirection);
 
+        if (Input.GetKeyDown(KeyCode.Space))
+            Jump();
+    }
+
+    private void Move()
+    {
         _rigidbody.MovePosition(transform.position + (transform.forward * input.z + transform.right * input.x) * Time.fixedDeltaTime * _speed);
+    }
+    public void SetGravity(Vector3 direction)
+    {
+        Physics.gravity = new Vector3(direction.x, direction.y, direction.z);
+    }
+    private void Jump()
+    {
+        float jumpForce = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
+        _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
     private void Angel()
     {
@@ -44,20 +65,33 @@ public class Cylinder : MonoBehaviour
             transform.rotation = Quaternion.Euler(rotationRef.eulerAngles.x, rotationRef.eulerAngles.y, rotationRef.eulerAngles.z);
         }
     }
-    private void Jump()
-    {
-        float jumpForce = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
-        _rigidbody.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-    }
-    public void SetVisitedPlanet(Transform planet, float gravityValue)
+    
+    public void SetVisitedPlanet(Transform planet)
     { 
         _visitedPlanet = planet;
-        gameObject.transform.SetParent(_visitedPlanet, true);
+        gameObject.transform.SetParent(planet, true);
 
-        _gravity = gravityValue;
+        
     }
-    private void Gravity()
+    public void SetPlanetGravity(float gravityValue)
     {
-        Physics.gravity = -transform.up;
+        _gravity = gravityValue;
+
+        if (_gravity != 0)
+        {
+            _inPlanet = true;
+            _rigidbody.freezeRotation = true;
+            _rigidbody.useGravity = true;
+            transform.rotation = Quaternion.LookRotation(_visitedPlanet.transform.position);
+
+        }
+        else
+        {
+            _rigidbody.useGravity = false;
+            _inPlanet = false;
+            _rigidbody.freezeRotation = false;
+        }
+
     }
+    
 }
