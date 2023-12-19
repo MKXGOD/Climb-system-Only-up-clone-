@@ -2,17 +2,10 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public float mouseSens = 1f;
-
-    public Transform Player;
+    [SerializeField] private float mouseSens = 1f;
 
     private float _xRotation = 0f;
-
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-    }
-    private void Update()
+    public void CameraRotation(Transform playerTransform)
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSens;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSens;
@@ -21,6 +14,6 @@ public class CameraController : MonoBehaviour
         _xRotation = Mathf.Clamp(_xRotation, -30f, 30f);
 
         transform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
-        Player.Rotate(Vector3.up * mouseX);
+        playerTransform.Rotate(Vector3.up * mouseX);
     }
 }

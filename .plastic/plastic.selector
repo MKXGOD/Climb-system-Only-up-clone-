@@ -1,0 +1,4 @@
+repository "Only Up@qwmobror@cloud"
+  path "/"
+    br "/main"
+    co "/main"

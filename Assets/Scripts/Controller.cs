@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {
-    [SerializeField]private Animator _animator;
-    [SerializeField]private CharacterController _characterController;
-
+    #region Components
+    private Animator _animator;
+    private CharacterController _characterController;
+    [SerializeField] private CameraController _cameraController;
+    #endregion
     #region Movement
     [SerializeField] private float _speed = 5f;
     private Vector3 _moveCharacter;
@@ -25,7 +27,13 @@ public class Controller : MonoBehaviour
     #endregion
     private bool _isClimbing;
     private bool _isGravity = true;
+    private void Awake()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
 
+        _animator = GetComponent<Animator>();
+        _characterController = GetComponent<CharacterController>();
+    }
     private void Update()
     {
         _moveCharacter = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
@@ -34,14 +42,8 @@ public class Controller : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
             Jump();
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            _animator.SetBool("_isClimb", true);
-        }
-        else if (Input.GetKeyDown(KeyCode.V))
-        {
-            _animator.SetBool("_isClimb", false);
-        }
+        if(!_isClimbing)
+            _cameraController.CameraRotation(transform);
 
         _animator.SetFloat("VectorX", Input.GetAxis("Horizontal"), 0.1f, Time.deltaTime);
         _animator.SetFloat("VectorZ", Input.GetAxis("Vertical"), 0.1f, Time.deltaTime);
@@ -57,11 +59,12 @@ public class Controller : MonoBehaviour
         }
         else _animator.SetBool("_isFall", true);
 
-        if(!_isClimbing)
-        Move(_moveCharacter);
-        TakeHighestPoint();
-        Climbing();
-        DoGravity();
+        if (!_isClimbing)
+            Move(_moveCharacter);
+
+            TakeHighestPoint();
+            Climbing();
+            DoGravity();
     }
     private void Move(Vector3 direction)
     {
@@ -72,6 +75,8 @@ public class Controller : MonoBehaviour
        _velocity = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
        _animator.SetTrigger("_isJump");
     }
+
+    //detection of hook points
     private void TakeHighestPoint()
     {
         bool headResult = Physics.Raycast(_climbCheckPivotHead.position, transform.TransformDirection(Vector3.forward), .6f, _objectLayer);
@@ -111,7 +116,7 @@ public class Controller : MonoBehaviour
         }
 
     }
-  
+    //detection ground
     private bool IsOnTheGround()
     {
         float groundStayDistance = .1f;
